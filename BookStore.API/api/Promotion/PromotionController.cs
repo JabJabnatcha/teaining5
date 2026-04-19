@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using BookStore.Application.DTOs;
 using BookStore.Application.Services;
 
 namespace BookStore.API.Controllers;
@@ -15,9 +16,9 @@ public class PromotionController : ControllerBase
     }
 
     [HttpPost("check")]
-    public IActionResult Check()
+    public IActionResult Check([FromBody] PromotionCheckRequest request)
     {
-        var result = _service.CheckPromotion();
+        var result = _service.CheckPromotion(request);
         return Ok(result);
     }
 }

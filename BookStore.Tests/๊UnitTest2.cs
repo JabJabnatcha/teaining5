@@ -1,39 +1,43 @@
-using System.Net;
-using System.Net.Http.Json;
-using Microsoft.AspNetCore.Mvc.Testing;
-using BookStore.API;
 using Xunit;
+using BookStore.Application.Services;
+using BookStore.Application.DTOs;
+using BookStore.Domain.Policies;
 
-namespace BookStore.Tests;
+namespace BookStore.Tests.Application;
 
-public class APIServiceTests : IClassFixture<WebApplicationFactory<Program>>
+public class PromotionAppServiceTests
 {
-    private readonly HttpClient _client;
-
-    public APIServiceTests(WebApplicationFactory<Program> factory)
+    [Fact]
+    public void Should_ReturnTrue_When_Eligible()
     {
-        _client = factory.CreateClient();
+        var policy = new PromotionPolicy();
+        var service = new PromotionAppService(policy);
+
+        var request = new PromotionCheckRequest
+        {
+            UserId = 1,
+            BookIds = new List<int> { 1, 2, 3, 4, 5 }
+        };
+
+        var result = service.CheckPromotion(request);
+
+        Assert.True(result);
     }
 
     [Fact]
-    public async Task POST_CheckPromotion_ShouldReturn200()
+    public void Should_ReturnFalse_When_NotEnoughBooks()
     {
-        // Act
-        var response = await _client.PostAsync("/api/promotion/check", null);
+        var policy = new PromotionPolicy();
+        var service = new PromotionAppService(policy);
 
-        // Assert
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-    }
+        var request = new PromotionCheckRequest
+        {
+            UserId = 1,
+            BookIds = new List<int> { 1, 2 }
+        };
 
-    [Fact]
-    public async Task POST_CheckPromotion_ShouldReturnTrue()
-    {
-        // Act
-        var result = await _client.PostAsync("/api/promotion/check", null);
+        var result = service.CheckPromotion(request);
 
-        var value = await result.Content.ReadFromJsonAsync<bool>();
-
-        // Assert
-        Assert.True(value);
+        Assert.False(result);
     }
 }

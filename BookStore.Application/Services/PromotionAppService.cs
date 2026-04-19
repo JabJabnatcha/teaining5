@@ -1,3 +1,4 @@
+using BookStore.Application.DTOs;
 using BookStore.Domain.Entities;
 using BookStore.Domain.Enums;
 using BookStore.Domain.Policies;
@@ -13,21 +14,20 @@ public class PromotionAppService
         _policy = policy;
     }
 
-    public bool CheckPromotion()
+    public bool CheckPromotion(PromotionCheckRequest request)
     {
+        // 🔥 mock data (ตอนนี้ยังไม่ใช้ DB)
         var user = new User
         {
+            Id = request.UserId,
             Subscription = true
         };
 
-        var books = new List<Book>
+        var books = request.BookIds.Select(id => new Book
         {
-            new Book { Category = BookCategory.Tales },
-            new Book { Category = BookCategory.Fables },
-            new Book { Category = BookCategory.Tales },
-            new Book { Category = BookCategory.Fables },
-            new Book { Category = BookCategory.Tales }
-        };
+            Id = id,
+            Category = BookCategory.Tales // mock ไปก่อน
+        }).ToList();
 
         var now = DateTime.Now;
         var storeOpen = DateTime.Now.AddMonths(-3);
