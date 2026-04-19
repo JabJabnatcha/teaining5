@@ -1,6 +1,7 @@
 using BookStore.Application.Services;
 using BookStore.Domain.Policies;
-using BookStore.API;
+using BookStore.Domain.Interfaces;
+using BookStore.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,11 +16,15 @@ builder.Services.AddSwaggerGen();
 /// Dependency Injection
 /// --------------------
 
-// Domain / Business rule (stateless)
+// Domain
 builder.Services.AddSingleton<PromotionPolicy>();
 
-// Application layer (use case)
+// Application
 builder.Services.AddScoped<PromotionAppService>();
+
+// Infrastructure (IMPORTANT)
+builder.Services.AddScoped<IUserRepository, FakeUserRepository>();
+builder.Services.AddScoped<IBookRepository, FakeBookRepository>();
 
 var app = builder.Build();
 
@@ -33,9 +38,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
+
+public partial class Program { }

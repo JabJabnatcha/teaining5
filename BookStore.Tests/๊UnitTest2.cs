@@ -2,33 +2,40 @@ using Xunit;
 using BookStore.Application.Services;
 using BookStore.Application.DTOs;
 using BookStore.Domain.Policies;
+using BookStore.Infrastructure;
 
 namespace BookStore.Tests.Application;
 
 public class PromotionAppServiceTests
 {
     [Fact]
-    public void Should_ReturnTrue_When_Eligible()
+public void Should_ReturnTrue_When_Eligible()
+{
+    var policy = new PromotionPolicy();
+
+    var userRepo = new FakeUserRepository();
+    var bookRepo = new FakeBookRepository();
+
+    var service = new PromotionAppService(policy, userRepo, bookRepo);
+
+    var request = new PromotionCheckRequest
     {
-        var policy = new PromotionPolicy();
-        var service = new PromotionAppService(policy);
+        UserId = 1,
+        BookIds = new List<int> { 1, 2, 3, 4, 5 }
+    };
 
-        var request = new PromotionCheckRequest
-        {
-            UserId = 1,
-            BookIds = new List<int> { 1, 2, 3, 4, 5 }
-        };
+    var result = service.CheckPromotion(request);
 
-        var result = service.CheckPromotion(request);
-
-        Assert.True(result);
-    }
+    Assert.True(result);
+}
 
     [Fact]
     public void Should_ReturnFalse_When_NotEnoughBooks()
     {
         var policy = new PromotionPolicy();
-        var service = new PromotionAppService(policy);
+        var userRepo = new FakeUserRepository();
+        var bookRepo = new FakeBookRepository();
+        var service = new PromotionAppService(policy, userRepo, bookRepo);
 
         var request = new PromotionCheckRequest
         {

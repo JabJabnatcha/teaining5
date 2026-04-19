@@ -1,6 +1,5 @@
 using BookStore.Application.DTOs;
-using BookStore.Domain.Entities;
-using BookStore.Domain.Enums;
+using BookStore.Domain.Interfaces;
 using BookStore.Domain.Policies;
 
 namespace BookStore.Application.Services;
@@ -8,26 +7,26 @@ namespace BookStore.Application.Services;
 public class PromotionAppService
 {
     private readonly PromotionPolicy _policy;
+    private readonly IUserRepository _userRepo;
+    private readonly IBookRepository _bookRepo;
 
-    public PromotionAppService(PromotionPolicy policy)
+    public PromotionAppService(
+        PromotionPolicy policy,
+        IUserRepository userRepo,
+        IBookRepository bookRepo)
     {
         _policy = policy;
+        _userRepo = userRepo;
+        _bookRepo = bookRepo;
     }
 
     public bool CheckPromotion(PromotionCheckRequest request)
     {
-        // 🔥 mock data (ตอนนี้ยังไม่ใช้ DB)
-        var user = new User
-        {
-            Id = request.UserId,
-            Subscription = true
-        };
+        var user = _userRepo.GetById(request.UserId);
+        var books = _bookRepo.GetByIds(request.BookIds);
 
-        var books = request.BookIds.Select(id => new Book
-        {
-            Id = id,
-            Category = BookCategory.Tales // mock ไปก่อน
-        }).ToList();
+        if (user == null)
+            return false;
 
         var now = DateTime.Now;
         var storeOpen = DateTime.Now.AddMonths(-3);
